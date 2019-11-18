@@ -100,6 +100,10 @@ bool Block::is_visible(int face) {
 	return visible[face];
 }
 
+int Block::get_type() {
+	return type;
+}
+
 
 Chunk::Chunk() {
 
@@ -401,7 +405,13 @@ void World::update(glm::vec3 p_pos, glm::vec3 p_eye) {
 
 bool World::vertical_colision(glm::vec3 pos) {
 	glm::vec3 c_pos = chunk_coord(pos);
-	Block b = chunks[(int)c_pos.x][(int)c_pos.z].get_block(pos-glm::vec3(0.0, 0.5, 0.0));
+	Block b = chunks[(int)c_pos.x][(int)c_pos.z].get_block(pos-glm::vec3(0.0, 0.2, 0.0));
+	return !b.is_air();
+}
+
+bool World::head_colision(glm::vec3 pos) {
+	glm::vec3 c_pos = chunk_coord(pos);
+	Block b = chunks[(int)c_pos.x][(int)c_pos.z].get_block(pos+glm::vec3(0.0, 1.9, 0.0));
 	return !b.is_air();
 }
 
@@ -418,22 +428,62 @@ glm::vec3 World::collision(glm::vec3 pos, glm::vec3 d_pos) {
 	glm::vec3 t_pos = pos+d_pos;
 	if(t_pos.x < 0 || t_pos.z < 0 || t_pos.z > WORLD_SIZE*CHUNK_SIZE || t_pos.x > WORLD_SIZE*CHUNK_SIZE)
 		return pos;
-	glm::vec3 c_pos = chunk_coord(pos+d_pos);
+
+
+	glm::vec3 pos_x = pos + glm::vec3(d_pos.x, 0.0, 0.0);
+	glm::vec3 c_pos = chunk_coord(pos_x);
 	
-	Block b = chunks[(int)c_pos.x][(int)c_pos.z].get_block(pos + glm::vec3(d_pos.x, 0.0, 0.0));
-	Block t = chunks[(int)c_pos.x][(int)c_pos.z].get_block(pos + glm::vec3(d_pos.x, 1.8, 0.0));
+	Block b = chunks[(int)c_pos.x][(int)c_pos.z].get_block(pos_x + glm::vec3(0.0, 0.0, 0.0));
+	Block t = chunks[(int)c_pos.x][(int)c_pos.z].get_block(pos_x + glm::vec3(0.0, 1.8, 0.0));
 	if(!b.is_air() || !t.is_air()) {
-		d_pos.x = 0;
+		if(d_pos.x > 0.01) {
+			d_pos.x = (int)pos.x+0.9 - pos.x;
+		} else if(d_pos.x < 0.01) {
+			d_pos.x = (int)pos.x+0.1 - pos.x;
+		} else {
+			d_pos.x = 0;
+		}
 	}
-	b = chunks[(int)c_pos.x][(int)c_pos.z].get_block(pos + glm::vec3(0.0, d_pos.y-0.0, 0.0));
-	t = chunks[(int)c_pos.x][(int)c_pos.z].get_block(pos + glm::vec3(0.0, d_pos.y+1.8, 0.0));
-	if(!b.is_air() || !t.is_air()) {
-		d_pos.y = 0;	
+
+
+	glm::vec3 pos_y = pos + glm::vec3(0.0, d_pos.y, 0.0);
+	c_pos = chunk_coord(pos_y);
+
+	b = chunks[(int)c_pos.x][(int)c_pos.z].get_block(pos_y + glm::vec3(0.0, 0.0, 0.0));
+	t = chunks[(int)c_pos.x][(int)c_pos.z].get_block(pos_y + glm::vec3(0.0, 1.8, 0.0));
+	if(!b.is_air()) {
+		if(d_pos.y > 0) {
+			//d_pos.y = 0;//(int)pos.y+0.9 - pos.y;
+		} else if(d_pos.y < 0) {
+			d_pos.y = (int)pos.y+0.01 - pos.y;
+		} else {
+			d_pos.y = 0;
+		}
 	}
-	b = chunks[(int)c_pos.x][(int)c_pos.z].get_block(pos + glm::vec3(0.0, 0.0, d_pos.z));
-	t = chunks[(int)c_pos.x][(int)c_pos.z].get_block(pos + glm::vec3(0.0, 1.8, d_pos.z));
+	if(!t.is_air()) {
+		if(d_pos.y > 0.1) {
+			d_pos.y = 0.1;//(int)pos.y+0.9 - pos.y;
+		} else if(d_pos.y < 0) {
+			//d_pos.y = (int)pos.y+0.01 - pos.y;
+		} else {
+			d_pos.y = 0;
+		}
+	}
+
+
+	glm::vec3 pos_z = pos + glm::vec3(0.0, 0.0, d_pos.z);
+	c_pos = chunk_coord(pos_z);
+
+	b = chunks[(int)c_pos.x][(int)c_pos.z].get_block(pos_z + glm::vec3(0.0, 0.0, 0.0));
+	t = chunks[(int)c_pos.x][(int)c_pos.z].get_block(pos_z + glm::vec3(0.0, 1.8, 0.0));
 	if(!b.is_air() || !t.is_air()) {
-		d_pos.z = 0;
+		if(d_pos.z > 0.01) {
+			d_pos.z = (int)pos.z+0.9 - pos.z;
+		} else if(d_pos.z < 0.01){
+			d_pos.z = (int)pos.z+0.1 - pos.z;
+		} else {
+			d_pos.z = 0;
+		}
 	}
 	return pos + d_pos;
 }
@@ -458,9 +508,9 @@ Collision World::trace(glm::vec3 pos, glm::vec3 eye) {
 	c.happened = false;
 	float min = 100.;
 	//printf("player: %g %g %g\n", pos.x, pos.y, pos.z);
-	for(int x = -4; x <= 4; x++) {
-		for(int y = -5; y <= 4; y++) {
-			for(int z = -4; z <= 4; z++) {
+	for(int x = -5; x <= 5; x++) {
+		for(int y = -6; y <= 5; y++) {
+			for(int z = -5; z <= 5; z++) {
 				if(is_block(pos+glm::vec3(x, y, z))) {
 					Block b = get_block(pos+glm::vec3(x, y, z));
 					if(!b.is_air()) {
@@ -472,7 +522,9 @@ Collision World::trace(glm::vec3 pos, glm::vec3 eye) {
 							float d = glm::dot(eye, glm::vec3(0.0, 1.0, 0.0));
 							if(abs(d) > 1e-6) { 
 								float t = glm::dot(f_pos - pos, glm::vec3(0.0, 1.0, 0.0)) / d;
-								if(glm::distance(f_pos, pos + t*eye) <= 0.5) {
+								if(		abs(f_pos.x - (pos + t*eye).x) <= 0.5
+									&&	abs(f_pos.z - (pos + t*eye).z) <= 0.5
+									&& t > 0) {
 									if(t < min) {
 										//printf("bloc: %g %g %g\n", b.get_pos().x, b.get_pos().y, b.get_pos().z);
 										//printf("col: fac:TOP t:%g p:%g %g %g\n",t, (pos + t*eye).x, (pos + t*eye).y, (pos + t*eye).z );
@@ -491,7 +543,9 @@ Collision World::trace(glm::vec3 pos, glm::vec3 eye) {
 							float d = glm::dot(eye, glm::vec3(0.0, -1.0, 0.0));
 							if(abs(d) > 1e-6) { 
 								float t = glm::dot(f_pos - pos, glm::vec3(0.0, -1.0, 0.0)) / d;
-								if(glm::distance(f_pos, pos + t*eye) <= 0.5) {
+								if(		abs(f_pos.x - (pos + t*eye).x) <= 0.5
+									&&	abs(f_pos.z - (pos + t*eye).z) <= 0.5
+									&& t > 0) {
 									if(t < min) {
 										//printf("bloc: %g %g %g\n", b.get_pos().x, b.get_pos().y, b.get_pos().z);
 										//printf("col: fac:BOT t:%g p:%g %g %g\n",t, (pos + t*eye).x, (pos + t*eye).y, (pos + t*eye).z );
@@ -511,7 +565,9 @@ Collision World::trace(glm::vec3 pos, glm::vec3 eye) {
 							float d = glm::dot(eye, glm::vec3(-1.0, 0.0, 0.0));
 							if(abs(d) > 1e-6) { 
 								float t = glm::dot(f_pos - pos, glm::vec3(-1.0, 0.0, 0.0)) / d;
-								if(glm::distance(f_pos, pos + t*eye) <= 0.5) {
+								if(		abs(f_pos.z - (pos + t*eye).z) <= 0.5
+									&&	abs(f_pos.y - (pos + t*eye).y) <= 0.5
+									&& t > 0) {
 									if(t < min) {
 										//printf("bloc: %g %g %g\n", b.get_pos().x, b.get_pos().y, b.get_pos().z);
 										//printf("col: fac:LEFT t:%g p:%g %g %g\n",t, (pos + t*eye).x, (pos + t*eye).y, (pos + t*eye).z );
@@ -531,7 +587,9 @@ Collision World::trace(glm::vec3 pos, glm::vec3 eye) {
 							float d = glm::dot(eye, glm::vec3(1.0, 0.0, 0.0));
 							if(abs(d) > 1e-6) { 
 								float t = glm::dot(f_pos - pos, glm::vec3(1.0, 0.0, 0.0)) / d;
-								if(glm::distance(f_pos, pos + t*eye) <= 0.5) {
+								if(		abs(f_pos.z - (pos + t*eye).z) <= 0.5
+									&&	abs(f_pos.y - (pos + t*eye).y) <= 0.5
+									&& t > 0) {
 									if(t < min) {
 										//printf("bloc: %g %g %g\n", b.get_pos().x, b.get_pos().y, b.get_pos().z);
 										//printf("col: fac:RIGHT t:%g p:%g %g %g\n",t, (pos + t*eye).x, (pos + t*eye).y, (pos + t*eye).z );
@@ -551,7 +609,9 @@ Collision World::trace(glm::vec3 pos, glm::vec3 eye) {
 							float d = glm::dot(eye, glm::vec3(0.0, 0.0, 1.0));
 							if(abs(d) > 1e-6) { 
 								float t = glm::dot(f_pos - pos, glm::vec3(0.0, 0.0, 1.0)) / d;
-								if(glm::distance(f_pos, pos + t*eye) <= 0.5) {
+								if(		abs(f_pos.x - (pos + t*eye).x) <= 0.5
+									&&	abs(f_pos.y - (pos + t*eye).y) <= 0.5
+									&& t > 0) {
 									if(t < min) {
 										//printf("bloc: %g %g %g\n", b.get_pos().x, b.get_pos().y, b.get_pos().z);
 										//printf("col: fac:FRONT t:%g p:%g %g %g\n",t, (pos + t*eye).x, (pos + t*eye).y, (pos + t*eye).z );
@@ -570,7 +630,9 @@ Collision World::trace(glm::vec3 pos, glm::vec3 eye) {
 							float d = glm::dot(eye, glm::vec3(0.0, 0.0, -1.0));
 							if(abs(d) > 1e-6) { 
 								float t = glm::dot(f_pos - pos, glm::vec3(0.0, 0.0, -1.0)) / d;
-								if(glm::distance(f_pos, (pos + t*eye)) <= 0.5) {
+								if(		abs(f_pos.x - (pos + t*eye).x) <= 0.5
+									&&	abs(f_pos.y - (pos + t*eye).y) <= 0.5
+									&& t > 0) {
 									if(t < min) {
 										//printf("bloc: %g %g %g\n", b.get_pos().x, b.get_pos().y, b.get_pos().z);
 										//printf("col: fac:BACK t:%g p:%g %g %g\n",t, (pos + t*eye).x, (pos + t*eye).y, (pos + t*eye).z );

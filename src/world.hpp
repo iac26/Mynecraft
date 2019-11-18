@@ -41,6 +41,7 @@ public:
 	void hide();
 	void unhide();
 	glm::vec3 get_pos();
+	int get_type();
 
 
 private:
@@ -86,6 +87,7 @@ public:
 	void create(unsigned int seed);
 	void update(glm::vec3 p_pos, glm::vec3 p_eye);
 	bool vertical_colision(glm::vec3 pos);
+	bool head_colision(glm::vec3 pos);
 	bool horizontal_colision(glm::vec3 pos);
 	glm::vec3 collision(glm::vec3 pos, glm::vec3 d_pos);
 	void draw(Shader shader, Solid faces[6], Texture tex[NB_TEX]);

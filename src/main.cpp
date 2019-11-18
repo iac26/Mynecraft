@@ -21,7 +21,7 @@
 
 
 
-#define FULLSCREEN
+//#define FULLSCREEN
 //#define LOWRES
 //#define VLOWRES
 
@@ -137,7 +137,6 @@ int main()
 	Faces[FRONT] = Solid(front_vert, sizeof(front_vert), VERT_NORM_TEX);
 	Faces[BACK] = Solid(back_vert, sizeof(back_vert), VERT_NORM_TEX);
 
-	printf("test\n");
 	Mexico.create(time(NULL));
 
 
@@ -167,7 +166,7 @@ int main()
 		//glm::vec3 c_coord = chunk_coord(cam_pos);
 		//printf("C: %g %g %g\n", c_coord.x, c_coord.y, c_coord.z);
 		cam_pos = Mexican.get_cam();
-		glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width/(float)height, 0.05f, 100.0f);
+		glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width/(float)height, 0.01f, 100.0f);
 		glm::mat4 model = glm::mat4(1.0f);
 		glm::mat4 view;
 
@@ -262,24 +261,29 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
         if(c.happened) {
         	if(c.face == TOP) {
-        		Mexico.update_block(c.bloc.get_pos()+glm::vec3(0.0, 1.0, 0.0), STONE);
+        		Mexico.update_block(c.bloc.get_pos()+glm::vec3(0.0, 1.0, 0.0), Mexican.get_hand());
         	}
         	if(c.face == BOT) {
-        		Mexico.update_block(c.bloc.get_pos()+glm::vec3(0.0, -1.0, 0.0), STONE);
+        		Mexico.update_block(c.bloc.get_pos()+glm::vec3(0.0, -1.0, 0.0), Mexican.get_hand());
         	}
         	if(c.face == RIGHT) {
-        		Mexico.update_block(c.bloc.get_pos()+glm::vec3(1.0, 0.0, 0.0), STONE);
+        		Mexico.update_block(c.bloc.get_pos()+glm::vec3(1.0, 0.0, 0.0), Mexican.get_hand());
         	}
         	if(c.face == LEFT) {
-        		Mexico.update_block(c.bloc.get_pos()+glm::vec3(-1.0, 0.0, 0.0), STONE);
+        		Mexico.update_block(c.bloc.get_pos()+glm::vec3(-1.0, 0.0, 0.0), Mexican.get_hand());
         	}
         	if(c.face == FRONT) {
-        		Mexico.update_block(c.bloc.get_pos()+glm::vec3(0.0, 0.0, 1.0), STONE);
+        		Mexico.update_block(c.bloc.get_pos()+glm::vec3(0.0, 0.0, 1.0), Mexican.get_hand());
         	}
         	if(c.face == BACK) {
-        		Mexico.update_block(c.bloc.get_pos()+glm::vec3(0.0, 0.0, -1.0), STONE);
+        		Mexico.update_block(c.bloc.get_pos()+glm::vec3(0.0, 0.0, -1.0), Mexican.get_hand());
         	}
         	
+        }
+    }
+    if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS) {
+        if(c.happened) {
+        	Mexican.set_hand(c.bloc.get_type());
         }
     }
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {

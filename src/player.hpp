@@ -20,6 +20,8 @@ public:
 	void jump();
 	void set_orient(glm::vec3 _front, glm::vec3 _eye);
 	void update(float dt, World w);
+	void set_hand(int type);
+	int get_hand();
 	glm::vec3 get_pos();
 	glm::vec3 get_cam();
 	glm::vec3 get_eye();
@@ -32,7 +34,7 @@ private:
 	bool fall;
 	float v_spd;
 	bool jmp;
-
+	int hand;
 
 
 

@@ -62,18 +62,30 @@ void Player::update(float dt, World w) {
 		spd = MOVE_SENSITIVITY*glm::normalize(mov);
 	}
 	mov = glm::vec3(0.0);
-	v_spd += -0.1*dt;
+	v_spd += -0.2*dt;
 	if(jmp && w.vertical_colision(pos)) {
-		v_spd = 0.5;
+		v_spd = 0.6;
 		printf("jump\n");
 	}
+	if(w.head_colision(pos)) {
+		v_spd = -0.1;
+		printf("ouch\n");
+	}
 	jmp = false;
-	if(v_spd < -0.5)
-		v_spd = -0.5;
+	if(v_spd < -0.9)
+		v_spd = -0.9;
 	glm::vec3 d_pos = spd*dt + glm::vec3(0.0, v_spd, 0.0)*dt;
 	pos = w.collision(pos, d_pos);
 
 	
+}
+
+void Player::set_hand(int type) {
+	hand = type;
+}
+
+int Player::get_hand() {
+	return hand;
 }
 
 glm::vec3 Player::get_cam() {
