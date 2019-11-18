@@ -4,13 +4,12 @@ layout (location = 0) out vec4 FragColor;
 
 in vec2 texCoord;
 in vec3 normal;
-in vec3 position;
 
 uniform sampler2D Texture;
 
 void main()
 {
-	vec3 sun = normalize(vec3(0.2, 1.0, 0.4));
+	vec3 sun = vec3(0.2, 1.0, 0.4);
 	vec3 color = texture(Texture, texCoord).rgb;
 	vec3 ambient = vec3(0.3, 0.3, 0.3);
 

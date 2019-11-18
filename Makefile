@@ -6,7 +6,7 @@ CC=gcc
 CFLAGS=
 
 LIB= -lglfw -lX11 -lGL -lm -ldl -lstdc++ 
-LIBM= -lglfw3 -framework Cocoa -framework OpenGL -framework IOkit -framework corevideo -lm -ldl -lstdc++
+LIBM= -lglfw -framework Cocoa -framework OpenGL -framework IOkit -framework corevideo -lm -ldl -lstdc++
 
 all : mynecraft
 
